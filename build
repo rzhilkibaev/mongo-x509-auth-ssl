@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker build -t mongo-x509-auth-ssl --no-cache .

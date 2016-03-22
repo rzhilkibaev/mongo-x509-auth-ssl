@@ -87,7 +87,8 @@ rm $CLIENT_CSR
 
 # At this point the files can be used by the mongod and mongo.
 # $ mongod --sslMode requireSSL --sslPEMKeyFile server.pem --sslCAFile CA.pem --auth --clusterAuthMode x509
-# $ mongo 
+# $ mongo admin --authenticationDatabase '$external' --ssl --sslPEMKeyFile mongodb-client.pem --sslCAFile mongodb-CA.pem --authenticationMechanism MONGODB-X509 -u "C=US,ST=CA,L=San Francisco,O=Jaspersoft,OU=JSDev,CN=admin"
+# Note the reverse order of elements in the subj (I don't know why).
 
 # Now for the java client we need to create trust-store.jks with CA.crt in it and key-store.jks with client.key and client.crt in it.
 

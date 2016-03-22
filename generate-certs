@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 #
 # This script creates all necessary keys and certificates.
+# By default the server certificate is created for hostname localhost.
+# To override the hostname specify it as the first argument to this script.
 # If you execute this script all existing files are going
 # to be overwritten with new ones and existing clients will no longer work.
 
 set -eo pipefail
+
+# the script first argument is a hostname to be used in the server certificate subj (the CN field)
+SRV_SUBJ_CN=${1:-localhost}
 
 # Generated files
 # CA pem file (private key + x509 cert)
@@ -13,8 +18,6 @@ CA_PEM=mongodb-CA.pem
 SRV_PEM=mongodb-server.pem
 # Client pem file (private key + x509 cert)
 CLIENT_PEM=mongodb-client.pem
-# JKS store with CA x509 cert in it
-CA_JKS=mongodb-CA.jks
 # Client JKS type store with client private key and certificate in it
 CLIENT_JKS=mongodb-client.jks
 
@@ -45,10 +48,15 @@ SUBJ_PART='/OU=JSDev/O=Jaspersoft/L=San Francisco/ST=CA/C=US'
 # Certification Authority certificate subj
 CA_SUBJ="/CN=CA$SUBJ_PART"
 # Server certificate subj, the CN must match the hosname of the server
-SRV_SUBJ="/CN=127.0.0.1$SUBJ_PART"
+SRV_SUBJ="/CN=$SRV_SUBJ_CN$SUBJ_PART"
 # Client certificate subj
 CLIENT_SUBJ="/CN=admin$SUBJ_PART"
 
+log() {
+    echo "[$0] $1"
+}
+
+log "Generating CA certs"
 # Using self-signed certificates.
 # The first step is to create private and public key and wrap the public key into a x509 certificate, signing it with the private key.
 # This generates the private key (.key) and certificate (.crt) files. The certificate is going to be our CA (Certification Authority).
@@ -63,6 +71,7 @@ cat $CA_KEY $CA_CRT > $CA_PEM
 # And wrap the public key into a x509 certificate, signing it with the root CA.crt we created earlier.
 # This will prove server identity to the client and enable SSL.
 
+log "Generating server certs"
 # Create server private key and CSR (certificate signing request).
 openssl req -new -nodes -newkey rsa:2048 -keyout $SRV_KEY -out $SRV_CSR -subj "$SRV_SUBJ"
 # Now we have server private key (.key) and server certificate signing request (.csr).
@@ -76,6 +85,7 @@ rm $SRV_CSR
 
 # Now we have server private key (.key), x509 certificate (.crt) and pem file.
 
+log "Generating client certs"
 # Now generate client files the same way.
 openssl req -new -nodes -newkey rsa:2048 -keyout $CLIENT_KEY -out $CLIENT_CSR -subj "$CLIENT_SUBJ"
 openssl x509 -CA $CA_CRT -CAkey $CA_KEY -CAcreateserial -req -days 9999 -in $CLIENT_CSR -out $CLIENT_CRT
@@ -92,15 +102,17 @@ rm $CLIENT_CSR
 
 # Now for the java client we need to create trust-store.jks with CA.crt in it and key-store.jks with client.key and client.crt in it.
 
-# Create JKS type trust store with CA cert in it.
-keytool -importcert -trustcacerts -noprompt -file $CA_CRT -keystore $CA_JKS -storepass '123456'
-
+log "Creating jks store"
+# remove JKS store from previous run
+rm -f $CLIENT_JKS
 # Create intermediate PKCS12 type store with client cert and key (I couldn't find another way to import client cert and key into JKS store).
 openssl pkcs12 -export -in $CLIENT_CRT -inkey $CLIENT_KEY -chain -CAfile $CA_PEM -out $CLIENT_P12 -password pass:123456
 # create JKS type key store with client cert and key
 keytool -importkeystore -deststorepass '123456' -srcstorepass '123456' -destkeystore $CLIENT_JKS -srckeystore $CLIENT_P12 -srcstoretype PKCS12
 # Won't need the .p12 file anymore.
 rm $CLIENT_P12
+# Create JKS type trust store with CA cert in it.
+keytool -importcert -trustcacerts -noprompt -file $CA_CRT -keystore $CLIENT_JKS -storepass '123456'
 # Won't need these eighter.
 rm $CA_KEY $CA_CRT $SRV_KEY $SRV_CRT $CLIENT_KEY $CLIENT_CRT $CA_SRL
 
@@ -109,6 +121,5 @@ echo "Created:"
 echo "CA PEM file with the private key and self-signed certificate in it: $CA_PEM"
 echo "Server PEM file with the private key and certificate signed by CA: $SRV_PEM"
 echo "Client PEM file with the private key and certificate signed by CA: $CLIENT_PEM"
-echo "Client JKS type trust store with CA sefl-signed certificate in it: $CA_JKS"
-echo "Client JKS type key store with client private key and certifcate in it: $CLIENT_JKS"
+echo "Client JKS type key store with client private key/certificate and CA certifcate in it (password: 123456): $CLIENT_JKS"
 echo "Done!"

@@ -16,7 +16,7 @@ This will start up MongoDB listening on 27017.
     $ mongo localhost/admin --ssl --sslPEMKeyFile mongodb-client.pem --sslCAFile mongodb-CA.pem \
         --authenticationDatabase '$external' --authenticationMechanism MONGODB-X509 \
         -u "C=US,ST=CA,L=San Francisco,O=Jaspersoft,OU=JSDev,CN=admin"
-This will copy client and CA pem files to the host and start mongo client.
+This will copy the client and CA pem files to the host and start mongo client.
       
 # Connecting from Java using mongo-java-driver
 
@@ -34,7 +34,7 @@ MongoClient mongoClient = new MongoClient(connectionString);
 
 # How to build this image
 
-You can generate certificates and keys for your own server if localhost doesn't work for you.
+You can generate certificates and keys for your own server if `localhost` doesn't work for you.
 
     $ ./generate-certs HOSTNAME
     $ docker build -t my-image --no-cache .

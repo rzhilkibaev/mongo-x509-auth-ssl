@@ -1,7 +1,7 @@
 # rzhilkibaev/mongo-x509-auth-ssl
 [![](http://dockeri.co/image/rzhilkibaev/mongo-x509-auth-ssl)](https://registry.hub.docker.com/u/rzhilkibaev/mongo-x509-auth-ssl/)
 
-MongoDB 3.2 with TSL/SSL and x509 authentication.
+MongoDB 3.2 with TLS/SSL and x509 authentication.
 This image is intended to be used for testing purposes as it contains insecure self-signed certificates and publicly accessible keypairs.
 
 # How to use this image

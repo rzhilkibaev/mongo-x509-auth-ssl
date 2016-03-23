@@ -21,7 +21,7 @@ This will copy client and CA pem files to the host and start mongo client.
 # Connecting from Java using mongo-java-driver
 
     $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-client.jks
-This will copy JKS store file from the image to the host. You can use it  in 
+This will copy JKS store file from the image to the host. Now you can use it in java. 
 ```java
 System.setProperty("javax.net.ssl.trustStore", "mongodb-client.jks");
 System.setProperty("javax.net.ssl.trustStorePassword", "123456");

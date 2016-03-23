@@ -1,7 +1,5 @@
 # rzhilkibaev/mongo-x509-auth-ssl
-[![](http://dockeri.co/image/rzhilkibaev/mongo-x509-auth-ssl)](https://registry.hub.docker.com/u/rzhilkibaev/mongo-x509-auth-ssl/)
-
-[![](https://badge.imagelayers.io/rzhilkibaev/mongo-x509-auth-ssl:latest.svg)](https://imagelayers.io/?images=rzhilkibaev/mongo-x509-auth-ssl:latest 'Get your own badge on imagelayers.io')
+[![](http://dockeri.co/image/rzhilkibaev/mongo-x509-auth-ssl)](https://registry.hub.docker.com/u/rzhilkibaev/mongo-x509-auth-ssl/) [![](https://badge.imagelayers.io/rzhilkibaev/mongo-x509-auth-ssl:latest.svg)](https://imagelayers.io/?images=rzhilkibaev/mongo-x509-auth-ssl:latest 'Get your own badge on imagelayers.io')
 
 MongoDB 3.2 with TLS/SSL and x509 authentication.
 This image is intended to be used for testing purposes as it contains insecure self-signed certificates and publicly accessible keypairs.
@@ -13,17 +11,26 @@ This will start up MongoDB listening on 27017.
 
 # Connecting from command line using mongo
 
+Get the client and CA pem files from the container
+
     $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-client.pem
     $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-CA.pem
-    $ mongo localhost/admin --ssl --sslPEMKeyFile mongodb-client.pem --sslCAFile mongodb-CA.pem \
-        --authenticationDatabase '$external' --authenticationMechanism MONGODB-X509 \
-        -u "C=US,ST=CA,L=San Francisco,O=Jaspersoft,OU=JSDev,CN=admin"
-This will copy the client and CA pem files to the host and start mongo client.
-      
+    
+Now use them with `mongo`
+    
+    $ mongo localhost/admin --ssl \
+        --sslPEMKeyFile mongodb-client.pem \
+        --sslCAFile mongodb-CA.pem \
+        --authenticationDatabase '$external' \
+        --authenticationMechanism MONGODB-X509 \
+        --username "C=US,ST=CA,L=San Francisco,O=Jaspersoft,OU=JSDev,CN=admin"
+        
 # Connecting from Java using mongo-java-driver
 
+First get the JKS store file from the container
+
     $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-client.jks
-This will copy JKS store file from the image to the host. Now you can use it in java. 
+Now you can use it in java. 
 ```java
 System.setProperty("javax.net.ssl.trustStore", "mongodb-client.jks");
 System.setProperty("javax.net.ssl.trustStorePassword", "123456");

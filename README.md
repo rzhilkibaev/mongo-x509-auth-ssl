@@ -33,6 +33,8 @@ MongoClient mongoClient = new MongoClient(connectionString);
 ```
 
 # How to build this image
+
 You can generate certificates and keys for your own server if localhost doesn't work for you.
+
     $ ./generate-certs HOSTNAME
     $ docker build -t my-image --no-cache .

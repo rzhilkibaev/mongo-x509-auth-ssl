@@ -13,8 +13,8 @@ This will start up MongoDB listening on 27017.
 
 Get the client and CA pem files from the container
 
-    $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-client.pem
-    $ docker cp mongo-x509:/etc/ssl/mongodb-client.jks mongodb-CA.pem
+    $ docker cp mongo-x509:/etc/ssl/mongodb-client.pem mongodb-client.pem
+    $ docker cp mongo-x509:/etc/ssl/mongodb-CA.pem mongodb-CA.pem
     
 Now use them with `mongo`
     
